@@ -16,6 +16,7 @@ public class FlappyBirdModel extends World {
 	private Bird bird;
 	private Ground ground;
 	private List<Pipe> pipes;
+	private Score score;
 	
 	private int timeUpdate;
 	
@@ -33,6 +34,8 @@ public class FlappyBirdModel extends World {
 		views = new ArrayList<IView>();
 		bird = new Bird();
 		pipes = new ArrayList<Pipe>();
+		score = new Score();
+		ground = new Ground();
 		
 		initializeWorld();
 	}
@@ -40,12 +43,13 @@ public class FlappyBirdModel extends World {
 	private void initializeWorld() {
 		currentPhase = GamePhase.RUNNING;
 		
-		bird = new Bird();
+		score.translate(new Vector2(0, 5));
+		this.addBody(score);
+		
 		bird.addFixture(Geometry.createCircle(0.5));
 		bird.setMass(MassType.NORMAL);
 		this.addBody(bird);
 		
-		ground = new Ground();
 		ground.translate(new Vector2(0, - (Globals.HEIGHT/2)/Globals.SCALE + 0.5));
 		ground.addFixture(Geometry.createRectangle(Globals.WIDHT/Globals.SCALE, 1));
 		ground.setMass(MassType.INFINITE);
@@ -69,7 +73,7 @@ public class FlappyBirdModel extends World {
 	
 	private void addPipe() {
 		Random rand = new Random();
-		int x = rand.nextInt(6) + 1;
+		int x = rand.nextInt(6) + 2;
 		Pipe pipeUp = new Pipe();
 		Pipe pipeDown = new Pipe();
 		

@@ -8,6 +8,7 @@ public class FlappyBirdMain {
 	private static void createWorld() {
 		FlappyBirdModel model = new FlappyBirdModel();
 		FlappyBirdView view = new FlappyBirdView(model);
+		
 		DefaultController controller = new DefaultController(model, view);
 		
 		model.addView(view);
