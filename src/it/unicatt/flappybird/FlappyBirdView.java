@@ -70,12 +70,6 @@ public class FlappyBirdView extends JPanel implements IView {
 				if (body.getClass() == Pipe.class) {
 					Graphics2DRenderer.render(g2d, shape, scale, new Color(40, 170, 60));
 				}
-				if (body.getClass() == Score.class) {
-					String text = "" + ((Score) body).getScore();
-					g2d.setColor(Color.BLACK);
-					g2d.setFont(new Font("TimesRoman", Font.BOLD, 20));
-					g2d.drawString(text, 0, 3);
-				}
 			}
 			
 			g2d.setTransform(ot);
@@ -86,10 +80,10 @@ public class FlappyBirdView extends JPanel implements IView {
 	
 	private void scoreTransform(Body body, Graphics2D g2d) {
 		AffineTransform ot = g2d.getTransform();
-		AffineTransform lt = new AffineTransform();
-		
-		lt.translate(body.getTransform().getTranslationX() * scale, body.getTransform().getTranslationY() * scale);
-		g2d.transform(lt);
+		AffineTransform tt = new AffineTransform();
+		tt.translate(body.getTransform().getTranslationX() * scale, body.getTransform().getTranslationY() * scale);
+		tt.concatenate(AffineTransform.getScaleInstance(1, -1));
+		g2d.transform(tt);
 		
 		String text = "" + ((Score) body).getScore();
 		Stroke originalStroke = g2d.getStroke();
@@ -97,7 +91,8 @@ public class FlappyBirdView extends JPanel implements IView {
         FontRenderContext frc = g2d.getFontRenderContext();
         TextLayout tl = new TextLayout(text, new Font("MONOSPACED", Font.BOLD, 50), frc);
         java.awt.Shape shape = tl.getOutline(null);
-        g2d.setStroke(new BasicStroke(4f));
+        
+		g2d.setStroke(new BasicStroke(4f));
         g2d.draw(shape);
         g2d.setColor(Color.white);
         g2d.fill(shape);

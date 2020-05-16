@@ -9,6 +9,7 @@ import org.dyn4j.dynamics.contact.ContactAdapter;
 import org.dyn4j.dynamics.contact.ContactPoint;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.MassType;
+import org.dyn4j.geometry.Rotation;
 import org.dyn4j.geometry.Vector2;
 
 public class FlappyBirdModel extends World {
@@ -43,7 +44,7 @@ public class FlappyBirdModel extends World {
 	private void initializeWorld() {
 		currentPhase = GamePhase.RUNNING;
 		
-		score.translate(new Vector2(0, 5));
+		score.translate(new Vector2(-0.25, 5));
 		this.addBody(score);
 		
 		bird.addFixture(Geometry.createCircle(0.5));
@@ -102,7 +103,7 @@ public class FlappyBirdModel extends World {
 		bird.setLinearVelocity(0, 5);
 	}
 	
-	public void generatePipe(double t) {
+	private void generatePipe(double t) {
 		int tmp = (int) (t * 100);
 		timeUpdate += tmp;
 		if ((timeUpdate % (tmp * 120)) == 0) {
@@ -110,7 +111,7 @@ public class FlappyBirdModel extends World {
 		}
 	}
 	
-	public void checkPipe() {
+	private void deletePipe() {
 		double endLine = - ((Globals.WIDHT/2)/Globals.SCALE) - 1;
 		List<Pipe> deletePipes = new ArrayList<Pipe>();
 		for (Pipe p : pipes) {
@@ -124,21 +125,33 @@ public class FlappyBirdModel extends World {
 		}
 	}
 	
-	public void movePipe() {
+	private void movePipe() {
 		for (Pipe p : pipes) {
 			p.translate(new Vector2(p.getLocalCenter().x - 0.05, p.getLocalCenter().y));
 		}
 	}
 	
+	private void addPoint() {
+		for (Pipe p : pipes) {
+			if (p.getTransform().getTranslationX() <= -1 && p.getTransform().getTranslationY() >= 0) {
+				if (!p.getPassed()) {
+					p.setPassed(true);
+					score.point();
+				}
+			}
+		}
+	}
+	
 	public boolean update(double elapsedTime) {
 		super.update(elapsedTime);
-		checkPipe();
+		addPoint();
+		deletePipe();
 		generatePipe(elapsedTime);
 		movePipe();
 		notifyViews();
 		return true;
 	}
-	
+
 	public void addView(IView view) {
 		views.add(view);
 	}
