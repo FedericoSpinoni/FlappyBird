@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.geom.AffineTransform;
 
 import javax.swing.JPanel;
@@ -55,6 +57,9 @@ public class FlappyBirdView extends JPanel implements IView {
 			}
 			if (body.getClass() == Bird.class) {
 				Graphics2DRenderer.render(g2d, shape, scale, Color.YELLOW);
+			}
+			if (body.getClass() == Pipe.class) {
+				Graphics2DRenderer.render(g2d, shape, scale, new Color(40, 170, 60));
 			}
 			
 			g2d.setTransform(ot);
