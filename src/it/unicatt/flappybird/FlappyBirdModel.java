@@ -9,13 +9,13 @@ import org.dyn4j.dynamics.contact.ContactAdapter;
 import org.dyn4j.dynamics.contact.ContactPoint;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.MassType;
-import org.dyn4j.geometry.Rotation;
 import org.dyn4j.geometry.Vector2;
 
 public class FlappyBirdModel extends World {
 	private List<IView> views;
 	private Bird bird;
 	private Ground ground;
+	private Sky sky;
 	private List<Pipe> pipes;
 	private Score score;
 	
@@ -37,6 +37,7 @@ public class FlappyBirdModel extends World {
 		pipes = new ArrayList<Pipe>();
 		score = new Score();
 		ground = new Ground();
+		sky = new Sky();
 		
 		initializeWorld();
 	}
@@ -56,6 +57,11 @@ public class FlappyBirdModel extends World {
 		ground.setMass(MassType.INFINITE);
 		this.addBody(ground);
 		
+		sky.translate(new Vector2(0, (Globals.HEIGHT/2)/Globals.SCALE));
+		sky.addFixture(Geometry.createRectangle(Globals.WIDHT/Globals.SCALE, 0.1));
+		sky.setMass(MassType.INFINITE);
+		this.addBody(sky);
+		
 		addPipe();
 		
 		this.setGravity(EARTH_GRAVITY);
@@ -64,7 +70,7 @@ public class FlappyBirdModel extends World {
 			
 			@Override
 			public boolean begin(ContactPoint point) {
-				if (bird == point.getBody1() && ground == point.getBody2() || bird == point.getBody1() && pipes.contains(point.getBody2())) {
+				if (bird == point.getBody1() && ground == point.getBody2() || bird == point.getBody1() && pipes.contains(point.getBody2()) || bird == point.getBody1() && sky == point.getBody2()) {
 					currentPhase = GamePhase.GAMEOVER;
 				}
 				return true;
