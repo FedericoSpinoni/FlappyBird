@@ -81,7 +81,7 @@ public class FlappyBirdModel extends World {
 		
 		double top = ((Globals.HEIGHT/2)/Globals.SCALE);
 		double down = -((Globals.HEIGHT/2)/Globals.SCALE);
-		double h_top = (double) x/2;
+  		double h_top = (double) x/2;
 		double h_down = (double) (9 - x)/2;
 		
 		pipeUp.translate(new Vector2((Globals.WIDHT/2)/Globals.SCALE + 1, top - h_top));
@@ -106,12 +106,31 @@ public class FlappyBirdModel extends World {
 		}
 	}
 	
-	public boolean update(double elapsedTime) {
-		super.update(elapsedTime);
-		generatePipe(elapsedTime);
+	public void checkPipe() {
+		double endLine = - ((Globals.WIDHT/2)/Globals.SCALE) - 1;
+		List<Pipe> deletePipes = new ArrayList<Pipe>();
+		for (Pipe p : pipes) {
+ 			if (p.getWorldCenter().x <= endLine) {
+ 				this.removeBody(p);
+ 				deletePipes.add(p);
+			}
+		}
+		for (Pipe p : deletePipes) {
+			pipes.remove(p);
+		}
+	}
+	
+	public void movePipe() {
 		for (Pipe p : pipes) {
 			p.translate(new Vector2(p.getLocalCenter().x - 0.05, p.getLocalCenter().y));
 		}
+	}
+	
+	public boolean update(double elapsedTime) {
+		super.update(elapsedTime);
+		checkPipe();
+		generatePipe(elapsedTime);
+		movePipe();
 		notifyViews();
 		return true;
 	}
