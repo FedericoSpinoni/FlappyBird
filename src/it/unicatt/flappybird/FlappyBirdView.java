@@ -10,6 +10,9 @@ import java.awt.Stroke;
 import java.awt.font.FontRenderContext;
 import java.awt.font.TextLayout;
 import java.awt.geom.AffineTransform;
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.List;
 
 import javax.swing.JPanel;
 
@@ -47,7 +50,7 @@ public class FlappyBirdView extends JPanel implements IView {
 		Graphics2D g2d = (Graphics2D) g;
 		transform(g2d);
 		
-		Body score = null;
+		Hashtable<Body, String> bodies = new Hashtable<Body, String>();
 		
 		for (Body body : model.getBodies()) {
 			AffineTransform ot = g2d.getTransform();
@@ -57,7 +60,9 @@ public class FlappyBirdView extends JPanel implements IView {
 			g2d.transform(lt);
 			
 			if (body.getClass() == Score.class) {
-				score = body;
+				bodies.put(body, "score");
+			} else if (body.getClass() == Title.class) {
+				bodies.put(body, "title");
 			} else {
 				Shape shape = body.getFixture(0).getShape();
 				
@@ -75,9 +80,39 @@ public class FlappyBirdView extends JPanel implements IView {
 			g2d.setTransform(ot);
 		}
 		
-		scoreTransform(score, g2d);
+		bodies.forEach((k, v) -> { 
+			if (v == "score") {
+				scoreTransform(k, g2d);
+			} else if (v == "title") {
+				titleTransform(k, g2d);
+			}
+        }); 
+		bodies.clear();
 	}
 	
+	private void titleTransform(Body body, Graphics2D g2d) {
+		AffineTransform ot = g2d.getTransform();
+		AffineTransform tt = new AffineTransform();
+		tt.translate(body.getTransform().getTranslationX() * scale, body.getTransform().getTranslationY() * scale);
+		tt.concatenate(AffineTransform.getScaleInstance(1, -1));
+		g2d.transform(tt);
+		
+		String text = "" + ((Title) body).getTitle();
+		Stroke originalStroke = g2d.getStroke();
+		g2d.setColor(Color.black);
+        FontRenderContext frc = g2d.getFontRenderContext();
+        TextLayout tl = new TextLayout(text, new Font("MONOSPACED", Font.BOLD, 30), frc);
+        java.awt.Shape shape = tl.getOutline(null);
+        
+		g2d.setStroke(new BasicStroke(4f));
+        g2d.draw(shape);
+        g2d.setColor(Color.white);
+        g2d.fill(shape);
+        g2d.setStroke(originalStroke);
+        
+        g2d.setTransform(ot);
+	}
+
 	private void scoreTransform(Body body, Graphics2D g2d) {
 		AffineTransform ot = g2d.getTransform();
 		AffineTransform tt = new AffineTransform();

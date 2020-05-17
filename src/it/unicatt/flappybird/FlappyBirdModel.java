@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import javax.sound.sampled.Clip;
-
 import org.dyn4j.dynamics.World;
 import org.dyn4j.dynamics.contact.ContactAdapter;
 import org.dyn4j.dynamics.contact.ContactPoint;
@@ -20,14 +18,13 @@ public class FlappyBirdModel extends World {
 	private Sky sky;
 	private List<Pipe> pipes;
 	private Score score;
+	private Title title;
 	
 	private int timeUpdate;
 	
 	enum GamePhase {
 		READY,
 		RUNNING,
-		FINISH,
-		TRANSITION,
 		GAMEOVER
 	}
 	
@@ -48,16 +45,20 @@ public class FlappyBirdModel extends World {
 		score = new Score();
 		ground = new Ground();
 		sky = new Sky();
+		title = new Title();
 		
 		initializeWorld();
 	}
 	
 	private void initializeWorld() {
-		currentPhase = GamePhase.RUNNING;
+		currentPhase = GamePhase.READY;
 		currentEvents = new ArrayList<GameEvent>();
 		
 		score.translate(new Vector2(-0.25, 5));
 		this.addBody(score);
+		
+		title.translate(new Vector2(-3.55, -2));
+		this.addBody(title);
 		
 		bird.addFixture(Geometry.createCircle(0.5));
 		bird.setMass(MassType.NORMAL);
@@ -72,8 +73,6 @@ public class FlappyBirdModel extends World {
 		sky.addFixture(Geometry.createRectangle(Globals.WIDHT/Globals.SCALE, 0.1));
 		sky.setMass(MassType.INFINITE);
 		this.addBody(sky);
-		
-		addPipe();
 		
 		this.setGravity(EARTH_GRAVITY);
 		
@@ -107,8 +106,8 @@ public class FlappyBirdModel extends World {
   		double h_top = (double) x/2;
 		double h_down = (double) (9 - x)/2;
 		
-		pipeUp.translate(new Vector2((Globals.WIDHT/2)/Globals.SCALE + 1, top - h_top));
-		pipeDown.translate(new Vector2((Globals.WIDHT/2)/Globals.SCALE + 1, down + h_down + 1));
+		pipeUp.translate(new Vector2((Globals.WIDHT/2)/Globals.SCALE + 1.5, top - h_top));
+		pipeDown.translate(new Vector2((Globals.WIDHT/2)/Globals.SCALE + 1.5, down + h_down + 1));
 		
 		this.pipes.add(pipeUp);
 		this.pipes.add(pipeDown);
@@ -117,6 +116,23 @@ public class FlappyBirdModel extends World {
 		this.addBody(pipeDown);
 	}
 
+	public void ready() {
+		currentPhase = GamePhase.READY;
+		this.addBody(title);
+		notifyViews();
+	}
+	
+	public void startGame() {
+		this.removeBody(title);
+		score.setScore(0);
+		bird.translateToOrigin();
+		for (Pipe p : pipes) {
+			this.removeBody(p);
+		}
+		pipes.clear();
+		currentPhase = GamePhase.RUNNING;
+	}
+	
 	public void jump() {
 		currentEvents.add(GameEvent.WING);
 		bird.setLinearVelocity(0, 5);

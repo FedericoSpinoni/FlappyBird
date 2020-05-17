@@ -27,7 +27,11 @@ public class DefaultController {
 					model.update(1.0/Globals.FPS);
 					DefaultController.this.view.requestFocus();
 				} else if (model.currentPhase == GamePhase.GAMEOVER) {
+					model.ready();
 					timer.stop();
+				} else if (model.currentPhase == GamePhase.READY) {
+					timer.stop();
+					DefaultController.this.view.requestFocus();
 				}
 			}
 		});
@@ -47,6 +51,11 @@ public class DefaultController {
 					if (e.getKeyChar() == ' ' && !actived) {
 						actived = true;
 						DefaultController.this.model.jump();
+					}
+				} else {
+					if (e.getKeyChar() == ' ' && !actived) {
+						DefaultController.this.model.startGame();
+						start();
 					}
 				}
 			}
