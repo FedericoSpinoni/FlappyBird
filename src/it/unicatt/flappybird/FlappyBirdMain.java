@@ -8,10 +8,12 @@ public class FlappyBirdMain {
 	private static void createWorld() {
 		FlappyBirdModel model = new FlappyBirdModel();
 		FlappyBirdView view = new FlappyBirdView(model);
+		SoundView soundview = new SoundView(model);
 		
 		DefaultController controller = new DefaultController(model, view);
 		
 		model.addView(view);
+		model.addView(soundview);
 		model.notifyViews();
 		
 		JFrame frame = new JFrame("FlappyBird");

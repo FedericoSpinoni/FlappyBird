@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import javax.sound.sampled.Clip;
+
 import org.dyn4j.dynamics.World;
 import org.dyn4j.dynamics.contact.ContactAdapter;
 import org.dyn4j.dynamics.contact.ContactPoint;
@@ -31,6 +33,14 @@ public class FlappyBirdModel extends World {
 	
 	public GamePhase currentPhase;
 	
+	enum GameEvent {
+		HIT,
+		POINT,
+		WING
+	}
+	
+	public List<GameEvent> currentEvents;
+	
 	public FlappyBirdModel() {
 		views = new ArrayList<IView>();
 		bird = new Bird();
@@ -44,6 +54,7 @@ public class FlappyBirdModel extends World {
 	
 	private void initializeWorld() {
 		currentPhase = GamePhase.RUNNING;
+		currentEvents = new ArrayList<GameEvent>();
 		
 		score.translate(new Vector2(-0.25, 5));
 		this.addBody(score);
@@ -57,7 +68,7 @@ public class FlappyBirdModel extends World {
 		ground.setMass(MassType.INFINITE);
 		this.addBody(ground);
 		
-		sky.translate(new Vector2(0, (Globals.HEIGHT/2)/Globals.SCALE));
+   		sky.translate(new Vector2(0, (Globals.HEIGHT/2)/Globals.SCALE));
 		sky.addFixture(Geometry.createRectangle(Globals.WIDHT/Globals.SCALE, 0.1));
 		sky.setMass(MassType.INFINITE);
 		this.addBody(sky);
@@ -71,6 +82,7 @@ public class FlappyBirdModel extends World {
 			@Override
 			public boolean begin(ContactPoint point) {
 				if (bird == point.getBody1() && ground == point.getBody2() || bird == point.getBody1() && pipes.contains(point.getBody2()) || bird == point.getBody1() && sky == point.getBody2()) {
+					currentEvents.add(GameEvent.HIT);
 					currentPhase = GamePhase.GAMEOVER;
 				}
 				return true;
@@ -106,6 +118,7 @@ public class FlappyBirdModel extends World {
 	}
 
 	public void jump() {
+		currentEvents.add(GameEvent.WING);
 		bird.setLinearVelocity(0, 5);
 	}
 	
@@ -121,7 +134,7 @@ public class FlappyBirdModel extends World {
 		double endLine = - ((Globals.WIDHT/2)/Globals.SCALE) - 1;
 		List<Pipe> deletePipes = new ArrayList<Pipe>();
 		for (Pipe p : pipes) {
- 			if (p.getWorldCenter().x <= endLine) {
+  			if (p.getWorldCenter().x <= endLine) {
  				this.removeBody(p);
  				deletePipes.add(p);
 			}
@@ -143,6 +156,7 @@ public class FlappyBirdModel extends World {
 				if (!p.getPassed()) {
 					p.setPassed(true);
 					score.point();
+					currentEvents.add(GameEvent.POINT);
 				}
 			}
 		}
@@ -155,6 +169,7 @@ public class FlappyBirdModel extends World {
 		generatePipe(elapsedTime);
 		movePipe();
 		notifyViews();
+		this.currentEvents.clear();
 		return true;
 	}
 
