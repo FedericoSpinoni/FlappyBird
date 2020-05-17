@@ -126,6 +126,7 @@ public class FlappyBirdModel extends World {
 		this.removeBody(title);
 		score.setScore(0);
 		bird.translateToOrigin();
+		bird.setLinearVelocity(0, 0);
 		for (Pipe p : pipes) {
 			this.removeBody(p);
 		}
